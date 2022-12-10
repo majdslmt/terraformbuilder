@@ -5,10 +5,12 @@ import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import "bootstrap/dist/css/bootstrap.min.css"
 import "bootstrap";
-import './main.css';
+import '../src/assets/main.css';
+import VS2 from 'vue-script2'
 
 const app = createApp(App)
 app.use(router)
+app.use(VS2)
 
 app.mount('#app')
 
