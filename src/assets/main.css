@@ -20,6 +20,8 @@ button{
 .controller {
   width: 12%;
   padding-bottom: 5px;
+  overflow-y: scroll !important;
+  height: 40em;
 
   float: left;
   padding: 20px;
@@ -60,3 +62,6 @@ code {
   color: blueviolet;
 }
 
+.dec{
+  padding-left: 20px;
+}

@@ -3,76 +3,88 @@
   <body>
 
     <img alt="Vue logo" class="logo" src="./assets/terraform-builder-logo.png" width="500" height="125" />
+    <div class="dec">
+        <h5>
+        This tool to create a your terraform file
+      </h5>
 
+      <ul>
+        <li>First chose your cloud provider</li>
+        <li>Then add services you need</li>
+      </ul>
+
+    </div>
     <div class="item">
       <div class="provider">
         <div>
-          <button class="btn btn-primary" @click="getProvider('Azure', 'terraform-data')">Azure</button>
+          <button class="btn btn-primary" @click="getProvider('Azure', 'terraform-data', 'AzureServices')">Azure</button>
         </div>
         <div>
-          <button class="btn btn-warning" @click="getProvider('AWS', 'AWS')">AWS</button>
+          <button class="btn btn-warning" @click="getProvider('AWS', 'AWS', 'AwsServices')">AWS</button>
         </div>
-        <div>
+<!--         <div>
           <button class="btn btn-info" @click="getProvider('GCP', 'GCP')">GCP</button>
         </div>
 
         <div>
           <button class="btn btn-danger" @click="getProvider('OpenStack', 'OpenStack')">open stack</button>
-        </div>
+        </div> -->
       </div>
+
+
 
       <div class="controller">
         <div class="AzureController" v-show="isAzure">
+          <div v-for="(word, index) in cloudcontrollers" :key="index">
+            <button class='{{ buttonColor }}' @click="buildTerraform(cloudcontrollers[index].toString(), 'terraform-data')" v-html="cloudcontrollers[index]"></button>
+          </div>
+
           <div>
-            <button class="btn btn-primary" @click="buildTerraform('Function', 'terraform-data')">Azure
+            <button  @click="buildTerraform('Function', 'terraform-data')">Azure
               Function</button>
           </div>
           <div>
-            <button class="btn btn-primary" @click="buildTerraform('cdn', 'terraform-data')">Azure
-              CDN</button>
-          </div>
-          <div>
-            <button class="btn btn-primary" @click="buildTerraform('Iot', 'terraform-data')">Azure
+            <button  @click="buildTerraform('Iot', 'terraform-data')">Azure
               IoT</button>
           </div>
           <div>
-            <button class="btn btn-primary" @click="buildTerraform('analysis', 'terraform-data')">Azure
+            <button  @click="buildTerraform('analysis', 'terraform-data')">Azure
               analysis</button>
           </div>
           <div>
-            <button class="btn btn-primary" @click="buildTerraform('app', 'terraform-data')">Azure App
+            <button  @click="buildTerraform('app', 'terraform-data')">Azure App
               service</button>
           </div>
 
           <div>
-            <button class="btn btn-primary" @click="buildTerraform('keyvault', 'terraform-data')">Azure
+            <button   @click="buildTerraform('keyvault', 'terraform-data')">Azure
               keyvault</button>
           </div>
 
           <div>
-            <button class="btn btn-primary" @click="buildTerraform('linuxvm', 'terraform-data')">Azure
+            <button  @click="buildTerraform('linuxvm', 'terraform-data')">Azure
               linux
               VM</button>
           </div>
 
           <div>
-            <button class="btn btn-primary" @click="buildTerraform('cosmosdb', 'terraform-data')">Azure
+            <button   @click="buildTerraform('cosmosdb', 'terraform-data')">Azure
               cosmosdb</button>
           </div>
 
           <div>
-            <button class="btn btn-primary" @click="buildTerraform('mssql', 'terraform-data')">Azure Ms
+            <button   @click="buildTerraform('mssql', 'terraform-data')">Azure Ms
               Sql</button>
           </div>
 
           <div>
-            <button class="btn btn-primary" @click="buildTerraform('storage', 'terraform-data')">Azure
+            <button   @click="buildTerraform('storage', 'terraform-data')">Azure
               Storage
               Account</button>
           </div>
 
           <div>
-            <button class="btn btn-primary" @click="buildTerraform('bi', 'terraform-data')">Azure
+            <button  @click="buildTerraform('bi', 'terraform-data')">Azure
               BI</button>
           </div>
 
@@ -102,7 +114,7 @@
 </template>
 <script lang="ts">
 import { defineComponent, VueElement } from 'vue'
-import { collection, query, where, getDocs } from "firebase/firestore";
+import { collection, query, where, getDocs, getDoc, doc } from "firebase/firestore";
 import { db } from "./main";
 
 export default defineComponent({
@@ -115,23 +127,28 @@ export default defineComponent({
   data() {
     return {
       terraform: [] as String[],
+      cloudcontrollers: [] as String[],
       isAzure: false,
       isAWS: false,
       isGCP: false,
       isOpenStack: false,
+      buttonColor: "btn btn-primary",
       isShowing: false,
     };
   },
   mounted() {
     this.msg
     this.terraform
+    this.cloudcontrollers
     this.isAzure
+    this.buttonColor
     this.isShowing
   }, methods: {
-    async getProvider(value: string, provider: string) {
+    async getProvider(value: string, provider: string, controller: string) {
       switch (provider) {
         case "terraform-data":
           this.isAzure = true;
+          this.buttonColor = "btn btn-primary";
           this.isAWS = false;
           this.isGCP = false;
           this.isOpenStack = false;
@@ -155,15 +172,21 @@ export default defineComponent({
           this.isOpenStack = true;
           break;
       }
-
+      this.terraform = [""];
       this.isShowing = true
       const q = query(collection(db, provider));
+      const docRef = doc(db, provider, controller);
+
       const querySnapshot = await getDocs(q);
+      var x = await getDoc(docRef);
+      this.cloudcontrollers = Object.keys(JSON.parse(JSON.stringify(x.data())))
+
+      console.log(this.cloudcontrollers);
+
       querySnapshot.forEach((doc) => {
         var dataJson = JSON.parse(JSON.stringify(doc.data()));
-        this.terraform.push(dataJson[value]);
 
-        console.log(`${doc.id} => ${doc.data()}`);
+        this.terraform.push(dataJson[value]);
       }
       );
 
